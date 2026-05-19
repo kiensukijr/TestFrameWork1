@@ -9,9 +9,40 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-      - run: mvn clean test
+    # 1. Checkout code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Setup JDK 17 với distribution temurin
+    - name: Setup JDK 17
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    # 3. Cache Maven dependencies để chạy nhanh
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    # 4. Install Maven dependencies
+    - name: Install dependencies
+      run: mvn clean install -DskipTests
+
+    # 5. Cài Chrome để Selenium chạy
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo apt install ./google-chrome-stable_current_amd64.deb
+
+    # 6. Run Selenium tests với Maven
+    - name: Run Maven tests
+      run: mvn test
