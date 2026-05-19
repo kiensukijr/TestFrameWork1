@@ -26,8 +26,14 @@ public class LoginTest {
         WebDriverManager.chromedriver().setup();
 
         // ChromeOptions (bỏ headless để thấy trình duyệt thao tác)
+        // ChromeOptions options = new ChromeOptions();
+        // driver = new ChromeDriver(options);
+
         ChromeOptions options = new ChromeOptions();
-        driver = new ChromeDriver(options);
+options.addArguments("--headless");            // chạy headless
+options.addArguments("--no-sandbox");          // tránh sandbox lỗi trên CI
+options.addArguments("--disable-dev-shm-usage"); // tránh lỗi memory trên runner
+driver = new ChromeDriver(options);
         driver.manage().window().maximize();
 
         // Explicit Wait 10 giây
